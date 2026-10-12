@@ -29,7 +29,7 @@ export async function testAdaptiveRecovery({
       contextLossResult = await page.evaluate(async () => {
         const canvases = Array.from(document.querySelectorAll('canvas'));
         if (canvases.length === 0) {
-          return { supported: false, reason: 'Không tìm thấy thẻ canvas nào trên trang.' };
+          return { supported: false, reason: 'No canvas elements found on page.' };
         }
 
         let canvas = null;
@@ -44,12 +44,12 @@ export async function testAdaptiveRecovery({
         }
 
         if (!canvas || !gl) {
-          return { supported: false, reason: 'Không có canvas nào sử dụng WebGL context trên trang.' };
+          return { supported: false, reason: 'No canvas elements utilize a WebGL context on page.' };
         }
 
         const loseExt = gl.getExtension('WEBGL_lose_context');
         if (!loseExt) {
-          return { supported: false, reason: 'Trình duyệt không cho phép extension WEBGL_lose_context.' };
+          return { supported: false, reason: 'Browser environment disallows WEBGL_lose_context extension.' };
         }
 
         let lostTriggered = false;

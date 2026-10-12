@@ -37,12 +37,13 @@ export async function inspectResponsiveErgonomics({
       const docScrollW = document.documentElement.scrollWidth;
 
       // 1. Horizontal Overflow Check
+      // 1. Horizontal Overflow Check
       let overflowElements = [];
       if (docScrollW > windowW + 2) {
         issues.push({
           type: 'HORIZONTAL_OVERFLOW',
           severity: 'HIGH',
-          message: `Tràn viền ngang phát sinh thanh cuộn rác! scrollWidth (${docScrollW}px) vượt quá viewport (${windowW}px).`,
+          message: `Horizontal overflow detected! scrollWidth (${docScrollW}px) exceeds viewport width (${windowW}px), creating rogue horizontal scrollbars.`,
         });
 
         // Identify offenders
@@ -77,7 +78,7 @@ export async function inspectResponsiveErgonomics({
               const textContent = (el.innerText || el.getAttribute('aria-label') || el.value || '').trim().substring(0, 40);
               undersizedTargets.push({
                 tag: el.tagName.toLowerCase(),
-                text: textContent || '[không có chữ]',
+                text: textContent || '[no text]',
                 dimensions: `${Math.round(rect.width)}x${Math.round(rect.height)}px`,
                 id: el.id || '',
                 className: el.className ? String(el.className).substring(0, 40) : '',
@@ -91,7 +92,7 @@ export async function inspectResponsiveErgonomics({
         issues.push({
           type: 'UNDERSIZED_TOUCH_TARGETS',
           severity: isMobile ? 'HIGH' : 'MEDIUM',
-          message: `Phát hiện ${undersizedTargets.length} phần tử tương tác nhỏ hơn ngưỡng tối thiểu ${minTouchSize}px, gây khó bấm trên màn hình cảm ứng.`,
+          message: `Detected ${undersizedTargets.length} interactive elements smaller than minimum touch threshold (${minTouchSize}px), hindering mobile ergonomics.`,
           count: undersizedTargets.length,
           samples: undersizedTargets.slice(0, 6),
         });
@@ -120,7 +121,7 @@ export async function inspectResponsiveErgonomics({
         issues.push({
           type: 'TEXT_CLIPPING',
           severity: 'MEDIUM',
-          message: `Phát hiện ${clippedTexts.length} khối văn bản bị cắt cụt (overflow: hidden nhưng nội dung vượt chiều cao).`,
+          message: `Detected ${clippedTexts.length} clipped text blocks (overflow: hidden with content exceeding bounding height).`,
           samples: clippedTexts,
         });
       }

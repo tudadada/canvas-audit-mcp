@@ -31,19 +31,19 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'audit_canvas_dpr',
         description:
-          'Kiểm tra độ sắc nét của Canvas/WebGL theo mật độ điểm ảnh (DPR). Phát hiện canvas bị mờ (do chưa nhân DPR), render quá cỡ (lãng phí VRAM), méo tỷ lệ (aspect distortion) và thiếu listener tự hồi phục.',
+          'Audit canvas/WebGL sharpness against Device Pixel Ratio (DPR). Detects blurry rendering (unscaled DPR), oversized buffers (wasting VRAM), aspect ratio distortion, and missing context recovery listeners.',
         inputSchema: {
           type: 'object',
           properties: {
-            url: { type: 'string', description: 'Địa chỉ URL cần kiểm tra (hỗ trợ cả localhost và public URL)' },
+            url: { type: 'string', description: 'Target URL to inspect (supports localhost and public URLs)' },
             preset: {
               type: 'string',
               enum: ['desktop_1080p', 'macbook_retina', 'desktop_4k', 'mobile_iphone', 'tablet_ipad'],
-              description: 'Cấu hình thiết bị mẫu (mặc định: macbook_retina)',
+              description: 'Device preset configuration (default: macbook_retina)',
             },
-            customDpr: { type: 'number', description: 'Tùy chỉnh DPR cụ thể (ví dụ: 1, 1.5, 2, 3)' },
-            captureScreenshot: { type: 'boolean', description: 'Chụp ảnh màn hình (mặc định: true)' },
-            waitForMs: { type: 'number', description: 'Thời gian chờ trang tải và vẽ (mili-giây, mặc định: 2000)' },
+            customDpr: { type: 'number', description: 'Custom Device Pixel Ratio override (e.g. 1, 1.5, 2, 3)' },
+            captureScreenshot: { type: 'boolean', description: 'Whether to capture full resolution screenshot (default: true)' },
+            waitForMs: { type: 'number', description: 'Wait time for rendering/animations in milliseconds (default: 2000)' },
           },
           required: ['url'],
         },
@@ -51,19 +51,19 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'profile_frametime_sync',
         description:
-          'Đo hiệu năng và độ mượt thực tế bằng phép đo đồng bộ GPU (True Sync Profiling). Đánh bại bẫy GPU xếp hàng bất đồng bộ và nhịp V-Sync xen kẽ. Trả về Median, P95, P99, Jitter và tỷ lệ tụt khung hình.',
+          'True Sync Profiling: Measures true frame pacing and stutter via continuous frames and synchronous GPU readback checks. Bypasses async command queue illusions and V-Sync phase hopping. Returns Median, P95, P99, Jitter, and frame drop rate.',
         inputSchema: {
           type: 'object',
           properties: {
-            url: { type: 'string', description: 'Địa chỉ URL cần đo đạc' },
+            url: { type: 'string', description: 'Target URL to profile' },
             preset: {
               type: 'string',
               enum: ['desktop_1080p', 'macbook_retina', 'desktop_4k', 'mobile_iphone', 'tablet_ipad'],
-              description: 'Cấu hình thiết bị mẫu (mặc định: desktop_1080p)',
+              description: 'Device preset configuration (default: desktop_1080p)',
             },
-            sampleFrames: { type: 'number', description: 'Số lượng khung hình liên tiếp để lấy mẫu (mặc định: 180)' },
-            warmupMs: { type: 'number', description: 'Thời gian chờ ổn định trước khi đo (mặc định: 1500)' },
-            cpuThrottleRate: { type: 'number', description: 'Hệ số bóp chậm CPU qua Chrome CDP (ví dụ: 1 = bình thường, 4 = chậm 4 lần)' },
+            sampleFrames: { type: 'number', description: 'Number of consecutive frames to sample (default: 180)' },
+            warmupMs: { type: 'number', description: 'Warmup duration before sampling starts in ms (default: 1500)' },
+            cpuThrottleRate: { type: 'number', description: 'CPU slowdown multiplier via Chrome CDP (e.g. 1 = normal, 4 = 4x slowdown)' },
           },
           required: ['url'],
         },
@@ -71,18 +71,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'inspect_responsive_ergonomics',
         description:
-          'Bộ kiểm tra công thái học và tính toàn vẹn giao diện có quan điểm: Bắt các nút bấm < 32px (khó bấm trên mobile), tràn viền ngang tạo thanh cuộn rác (scrollWidth > innerWidth), và khối chữ bị cắt cụt.',
+          'Opinionated ergonomics and layout integrity audit: Flags touch targets < 32px (difficult on mobile), horizontal overflow leaks creating rogue scrollbars (scrollWidth > innerWidth), and clipped text blocks.',
         inputSchema: {
           type: 'object',
           properties: {
-            url: { type: 'string', description: 'Địa chỉ URL cần kiểm tra' },
+            url: { type: 'string', description: 'Target URL to inspect' },
             preset: {
               type: 'string',
               enum: ['desktop_1080p', 'macbook_retina', 'desktop_4k', 'mobile_iphone', 'tablet_ipad'],
-              description: 'Cấu hình thiết bị mẫu (mặc định: mobile_iphone)',
+              description: 'Device preset configuration (default: mobile_iphone)',
             },
-            minTouchSize: { type: 'number', description: 'Kích thước nút bấm tối thiểu cho phép (px, mặc định: 32)' },
-            captureScreenshot: { type: 'boolean', description: 'Chụp ảnh màn hình (mặc định: true)' },
+            minTouchSize: { type: 'number', description: 'Minimum interactive touch target size in px (default: 32)' },
+            captureScreenshot: { type: 'boolean', description: 'Whether to capture screenshot (default: true)' },
           },
           required: ['url'],
         },
@@ -90,18 +90,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'test_adaptive_recovery',
         description:
-          'Kiểm tra khả năng tự hồi phục khi card đồ họa bị crash/reset (mô phỏng WebGL Context Lost và Restored qua WEBGL_lose_context) và kiểm tra logic tự giảm tải chất lượng.',
+          'Tests WebGL context crash recovery (simulating GPU reset via WEBGL_lose_context) and optional dynamic load downscaling behavior.',
         inputSchema: {
           type: 'object',
           properties: {
-            url: { type: 'string', description: 'Địa chỉ URL cần kiểm tra' },
+            url: { type: 'string', description: 'Target URL to inspect' },
             preset: {
               type: 'string',
               enum: ['desktop_1080p', 'macbook_retina', 'desktop_4k', 'mobile_iphone', 'tablet_ipad'],
-              description: 'Cấu hình thiết bị mẫu (mặc định: desktop_1080p)',
+              description: 'Device preset configuration (default: desktop_1080p)',
             },
-            testContextLoss: { type: 'boolean', description: 'Mô phỏng sập GPU context và kiểm tra tự hồi phục (mặc định: true)' },
-            testLoadDegradation: { type: 'boolean', description: 'Kiểm tra logic tự hạ độ phân giải khi lag (mặc định: false)' },
+            testContextLoss: { type: 'boolean', description: 'Simulate GPU context loss and test self-recovery (default: true)' },
+            testLoadDegradation: { type: 'boolean', description: 'Test dynamic resolution downscaling under artificial lag (default: false)' },
           },
           required: ['url'],
         },
@@ -109,11 +109,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'compare_device_matrix',
         description:
-          'Chạy kiểm tra tổng hợp trên 3 phân khúc thiết bị chủ chốt (Desktop 1080p 1x, MacBook Retina 2x, iPhone Mobile 3x) để phát hiện sự khác biệt về hiển thị và lỗi layout.',
+          'Executes an aggregated audit across 3 key benchmark tiers (Desktop 1080p 1x, MacBook Retina 2x, iPhone 3x) to identify cross-device rendering discrepancies.',
         inputSchema: {
           type: 'object',
           properties: {
-            url: { type: 'string', description: 'Địa chỉ URL cần kiểm tra' },
+            url: { type: 'string', description: 'Target URL to inspect' },
           },
           required: ['url'],
         },
@@ -227,7 +227,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       default:
-        throw new Error(`Công cụ không xác định: ${name}`);
+        throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error) {
     return {
@@ -235,7 +235,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       content: [
         {
           type: 'text',
-          text: `Lỗi khi thực thi ${name}: ${error instanceof Error ? error.message : String(error)}`,
+          text: `Error executing ${name}: ${error instanceof Error ? error.message : String(error)}`,
         },
       ],
     };

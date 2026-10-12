@@ -1,100 +1,115 @@
 # canvas-audit-mcp
 
-> **Opinionated Canvas, WebGL & Display Quality Auditor for Model Context Protocol (MCP)**
+> **Opinionated Canvas, WebGL & Display Quality Auditor for the Model Context Protocol (MCP)**
 
-Khác với các công cụ browser automation thông thường (chỉ cung cấp "cánh tay" để click/mở trang), **`canvas-audit-mcp`** là một **"con mắt có quan điểm khắt khe"** (Opinionated Eye) được đóng gói từ những kinh nghiệm xương máu khi kiểm thử đồ họa web thực tế:
-- **Không ảo tưởng phần cứng:** Không cố "giả lập GPU vật lý bằng phần mềm". Thay vào đó, tập trung vào việc mô phỏng chính xác mật độ điểm ảnh (DPR), kiểm tra tính toàn vẹn bố cục (Layout/Ergonomics) và kiểm tra khả năng tự hồi phục khi card đồ họa reset.
-- **Loại bỏ 3 bẫy đo lừa dối:** Đánh bại hiện tượng GPU xếp hàng bất đồng bộ, bỏ qua hàm `gl.finish()` giả mạo của Chrome, và đo phân phối khung hình (Median, P95, VSync Jitter) trên 180 frames để không bị nhịp quét màn hình đánh lừa.
-- **Chẩn đoán mờ nét Canvas/WebGL:** Tự động phát hiện lỗi quên nhân `devicePixelRatio` khiến canvas bị mờ vỡ nét trên màn hình Retina (MacBook, 4K, iPhone).
+[![npm version](https://img.shields.io/npm/v/canvas-audit-mcp.svg)](https://www.npmjs.com/package/canvas-audit-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Unlike general browser automation tools that merely provide mechanical "hands" (click, type, navigate), **`canvas-audit-mcp`** serves as an **"opinionated eye"** engineered specifically for web graphics, display fidelity, and real-world rendering audits:
+
+- **No Hardware Illusions:** We don't pretend to emulate physical GPUs purely in software. Instead, we accurately audit high-DPI scaling (Device Pixel Ratio), verify layout & touch ergonomics, and validate WebGL resilience against GPU context crashes.
+- **Defeating the 3 Measurement Traps:**
+  1. *Async Queue Deception:* Standard JS loop benchmarks look fast on slow GPUs because draw commands are merely placed in an asynchronous pipeline.
+  2. *Chrome's `gl.finish()` deception:* In Chrome, `gl.finish()` does not synchronously block execution as classical OpenGL textbooks suggest.
+  3. *V-Sync Hopping:* Single-frame sampling causes 25x errors due to 16.6ms vs. 450ms V-Sync phase shifts. We profile frame distributions (Median, P95, and Jitter) over continuous multi-frame streams with synchronous GPU readback verification.
+- **Canvas & WebGL Sharpness Diagnosis:** Automatically detects unscaled canvas buffers where developers forgot `canvas.width = clientWidth * window.devicePixelRatio`, exposing blurry rendering on Retina, 4K, and modern mobile displays.
 
 ---
 
-## 🛠 Danh sách công cụ (MCP Tools)
+## 🛠 MCP Tools
 
 ### 1. `audit_canvas_dpr`
-Quét toàn bộ thẻ `<canvas>` trong trang web:
-- **Phát hiện mờ nét (Blurry):** Cảnh báo nếu `canvas.width < clientWidth * DPR` kèm tỷ lệ mờ.
-- **Phát hiện lãng phí (Oversized):** Cảnh báo nếu render dư thừa điểm ảnh gây tốn VRAM.
-- **Lỗi méo hình (Aspect Distortion):** So sánh tỷ lệ khung hình CSS với tỷ lệ điểm ảnh buffer.
-- **Tự hồi phục (Resilience):** Kiểm tra xem canvas có lắng nghe sự kiện `webglcontextlost` hay không.
+Audits all `<canvas>` elements across targeted device presets or custom DPRs:
+- **Blurriness Detection (Under-sampled):** Warns if `canvas.width < clientWidth * DPR` and computes the exact sharpness ratio.
+- **Wasteful Oversampling:** Warns if render targets are oversized, wasting precious GPU fillrate and VRAM.
+- **Aspect Ratio Distortion:** Detects non-uniform stretching between CSS dimensions and internal drawing buffer aspect ratio.
+- **Context Resilience:** Checks whether canvas instances have registered `webglcontextlost` and `webglcontextrestored` event handlers.
 
 ### 2. `profile_frametime_sync`
-Đo hiệu năng và độ mượt bằng kỹ thuật **True Sync Profiling**:
-- Trả về **Median Frametime** (ms) và **Effective FPS**.
-- **P95 Frametime** (ms): Bắt các khung hình bị giật cục nặng nhất.
-- **Jitter** (ms): Đo độ lệch nhịp giữa các frame liên tiếp (bắt hiện tượng V-Sync xen kẽ 17ms - 450ms).
-- Hỗ trợ bóp chậm CPU (`cpuThrottleRate`: 1x - 6x) qua Chrome DevTools Protocol.
+Measures true rendering performance using **True Sync Profiling**:
+- **Median Frametime (ms)** & **Effective FPS**: Unbiased operational speed.
+- **P95 / P99 Frametime (ms)**: Quantifies the worst stutter frames.
+- **Jitter (ms)**: Measures frame-to-frame pacing variation to detect V-Sync phase hopping.
+- **CPU Throttling**: Supports Chrome DevTools Protocol CPU throttling (1x to 6x) to inspect CPU-side marshalling bottlenecks.
 
 ### 3. `inspect_responsive_ergonomics`
-Bộ kiểm tra công thái học và giao diện:
-- **Ngưỡng chạm ngón tay:** Bắt tất cả các nút hoặc link nhỏ hơn **32px × 32px** (hoặc tùy chỉnh).
-- **Tràn viền ngang:** Tìm chính xác phần tử làm `scrollWidth > innerWidth` sinh thanh cuộn rác.
-- **Chữ bị cắt cụt (Text Clipping):** Tìm các khối text bị `overflow: hidden` làm mất chữ.
+Audits touch targets and layout integrity across viewport sizes:
+- **Touch Target Threshold:** Flags buttons, links, and interactives smaller than **32px × 32px** (or configurable threshold).
+- **Horizontal Overflow Leaks:** Pinpoints the exact element causing `scrollWidth > innerWidth` (rogue horizontal scrollbars).
+- **Text Clipping:** Identifies text containers with `overflow: hidden` where copy is silently truncated.
 
 ### 4. `test_adaptive_recovery`
-- Mô phỏng sập card đồ họa thông qua extension `WEBGL_lose_context`.
-- Kiểm tra xem trang web có tự động bắt sự kiện và phục hồi (`webglcontextrestored`) để tiếp tục vẽ hay bị chết đứng.
+- Simulates sudden GPU crashes using the `WEBGL_lose_context` extension.
+- Verifies that the application catches `webglcontextlost` and successfully recovers rendering via `webglcontextrestored` rather than freezing permanently.
+- Optionally monitors adaptive degradation behavior under artificial load.
 
 ### 5. `compare_device_matrix`
-- Tự động chạy quét trang web trên **3 phân khúc chuẩn**:
-  - `desktop_1080p` (Màn hình thường, DPR 1x)
-  - `macbook_retina` (Màn hình sắc nét, DPR 2x)
-  - `mobile_iphone` (Màn hình điện thoại cao cấp, DPR 3x)
-- Xuất bảng so sánh tổng hợp trực quan.
+- Runs a consolidated audit across **3 benchmark device tiers**:
+  - `desktop_1080p` (Standard Display, DPR 1x)
+  - `macbook_retina` (High-DPI Retina, DPR 2x)
+  - `mobile_iphone` (High-Density Mobile, DPR 3x)
+- Returns an aggregated comparison matrix for side-by-side analysis.
 
 ---
 
-## 🚀 Hướng dẫn Cài đặt & Cấu hình
+## 🚀 Quick Start & Integration
 
-### 1. Cài đặt môi trường
-Dự án yêu cầu **Node.js >= 18**:
+### Run via `npx` (No Installation Required)
+
+Add directly to your MCP client configuration:
+
+#### Google Antigravity (`~/.gemini/config/mcp_config.json`)
+```json
+{
+  "mcpServers": {
+    "canvas-audit": {
+      "command": "npx",
+      "args": ["-y", "canvas-audit-mcp"]
+    }
+  }
+}
+```
+
+#### Claude Desktop (`claude_desktop_config.json`)
+```json
+{
+  "mcpServers": {
+    "canvas-audit": {
+      "command": "npx",
+      "args": ["-y", "canvas-audit-mcp"]
+    }
+  }
+}
+```
+
+#### Cursor (`.cursor/mcp.json`)
+```json
+{
+  "mcpServers": {
+    "canvas-audit": {
+      "command": "npx",
+      "args": ["-y", "canvas-audit-mcp"]
+    }
+  }
+}
+```
+
+---
+
+## 💻 Local Development & Testing
+
 ```bash
-cd "canvas-audit-mcp"
+git clone https://github.com/tudadada/canvas-audit-mcp.git
+cd canvas-audit-mcp
 npm install
 npx playwright install chromium
-```
 
-### 2. Tích hợp vào Google Antigravity
-Thêm vào file cấu hình `~/.gemini/config/mcp_config.json`:
-```json
-{
-  "mcpServers": {
-    "canvas-audit": {
-      "command": "node",
-      "args": ["E:/Project A/Today - Tram trung chuyen/canvas-audit-mcp/src/index.js"]
-    }
-  }
-}
-```
-
-### 3. Tích hợp vào Claude Desktop (`claude_desktop_config.json`)
-```json
-{
-  "mcpServers": {
-    "canvas-audit": {
-      "command": "node",
-      "args": ["E:/Project A/Today - Tram trung chuyen/canvas-audit-mcp/src/index.js"]
-    }
-  }
-}
-```
-
-### 4. Tích hợp vào Cursor (`.cursor/mcp.json`)
-```json
-{
-  "mcpServers": {
-    "canvas-audit": {
-      "command": "node",
-      "args": ["E:/Project A/Today - Tram trung chuyen/canvas-audit-mcp/src/index.js"]
-    }
-  }
-}
+# Run internal integration tests against sample page
+npm test
 ```
 
 ---
 
-## 🧪 Chạy thử nghiệm nội bộ
-Để kiểm tra mọi tính năng chạy chuẩn xác với trang mẫu tích hợp sẵn:
-```bash
-npm test
-```
+## 📄 License
+
+MIT © [tudadada](https://github.com/tudadada)

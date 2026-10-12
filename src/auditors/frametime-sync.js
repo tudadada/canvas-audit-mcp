@@ -90,7 +90,7 @@ export async function profileFrametimeSync({
       return {
         url,
         preset: config.name,
-        error: 'Không thể thu thập dữ liệu khung hình (không có requestAnimationFrame đang chạy).',
+        error: 'Unable to collect frame deltas (no requestAnimationFrame loop running).',
       };
     }
 
@@ -124,18 +124,18 @@ export async function profileFrametimeSync({
     if (p95 > 50) {
       verdict = 'SEVERE_STUTTER';
       observations.push(
-        `Hiện tượng giật cục nghiêm trọng (P95 = ${p95.toFixed(1)}ms). Hơn 5% số khung hình bị nghẽn vượt quá 50ms.`
+        `Severe frame stutter detected (P95 = ${p95.toFixed(1)}ms). Over 5% of frames exceeded 50ms latency.`
       );
     } else if (p95 > 25) {
       verdict = 'DROPPING_FRAMES';
       observations.push(
-        `Tụt khung hình (P95 = ${p95.toFixed(1)}ms, Drop Rate = ${dropRatePercent}%). Không duy trì được 60 FPS ổn định.`
+        `Frame drops detected (P95 = ${p95.toFixed(1)}ms, Drop Rate = ${dropRatePercent}%). Unable to sustain solid 60 FPS.`
       );
     }
 
     if (avgJitter > 8) {
       observations.push(
-        `Khung hình bất ổn định (Jitter cao = ${avgJitter}ms). Có dấu hiệu hiện tượng V-Sync xen kẽ giữa các nhịp quét màn hình.`
+        `Unstable frame pacing (High Jitter = ${avgJitter}ms). Strong evidence of alternating V-Sync phase hopping.`
       );
     }
 

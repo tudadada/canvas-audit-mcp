@@ -11,75 +11,75 @@ const sampleHtmlPath = path.resolve(__dirname, 'sample-page.html');
 const testUrl = `file://${sampleHtmlPath.replace(/\\/g, '/')}`;
 
 async function runTests() {
-  console.log('=== BẮT ĐẦU KIỂM THỬ NỘI BỘ CANVAS-AUDIT-MCP ===\n');
-  console.log(`URL thử nghiệm: ${testUrl}\n`);
+  console.log('=== STARTING LOCAL INTEGRATION TESTS: CANVAS-AUDIT-MCP ===\n');
+  console.log(`Test URL: ${testUrl}\n`);
 
   // 1. Test Canvas DPR Audit
-  console.log('--- 1. Kiểm thử Canvas DPR Audit (Preset: macbook_retina, DPR=2) ---');
+  console.log('--- 1. Testing Canvas DPR Audit (Preset: macbook_retina, DPR=2) ---');
   const dprRes = await auditCanvasDpr({
     url: testUrl,
     preset: 'macbook_retina',
     captureScreenshot: false,
     waitForMs: 1000,
   });
-  console.log(`Số lượng canvas: ${dprRes.canvasCount}`);
+  console.log(`Canvas elements detected: ${dprRes.canvasCount}`);
   for (const c of dprRes.canvases) {
     console.log(`\nCanvas [${c.id}]:`);
-    console.log(`  - Kích thước CSS: ${c.cssDimensions.width}x${c.cssDimensions.height}px`);
-    console.log(`  - Kích thước Buffer: ${c.bufferDimensions.width}x${c.bufferDimensions.height}px`);
-    console.log(`  - Chuẩn khuyến nghị (DPR=${dprRes.dpr}): ${c.expectedDimensions.width}x${c.expectedDimensions.height}px`);
-    console.log(`  - Tỷ lệ độ nét (Sharpness): ${(c.sharpnessRatio * 100).toFixed(0)}% -> Trạng thái: ${c.status}`);
+    console.log(`  - CSS dimensions: ${c.cssDimensions.width}x${c.cssDimensions.height}px`);
+    console.log(`  - Buffer dimensions: ${c.bufferDimensions.width}x${c.bufferDimensions.height}px`);
+    console.log(`  - Expected dimensions (DPR=${dprRes.dpr}): ${c.expectedDimensions.width}x${c.expectedDimensions.height}px`);
+    console.log(`  - Sharpness ratio: ${(c.sharpnessRatio * 100).toFixed(0)}% -> Status: ${c.status}`);
     if (c.issues.length > 0) {
-      console.log(`  - Vấn đề phát hiện:`);
+      console.log(`  - Detected issues:`);
       c.issues.forEach((iss) => console.log(`     * ${iss}`));
     }
   }
 
   // 2. Test Ergonomics Audit
-  console.log('\n--- 2. Kiểm thử Công thái học (Ergonomics, Ngưỡng 32px) ---');
+  console.log('\n--- 2. Testing Ergonomics Audit (Threshold: 32px) ---');
   const ergoRes = await inspectResponsiveErgonomics({
     url: testUrl,
     preset: 'mobile_iphone',
     minTouchSize: 32,
     captureScreenshot: false,
   });
-  console.log(`Vấn đề phát hiện: ${ergoRes.audit.issues.length}`);
+  console.log(`Issues detected: ${ergoRes.audit.issues.length}`);
   for (const iss of ergoRes.audit.issues) {
     console.log(`  - [${iss.severity}] ${iss.message}`);
     if (iss.samples) {
-      iss.samples.forEach((s) => console.log(`     * Tag: ${s.tag}, Kích thước: ${s.dimensions}, Nội dung: "${s.text}"`));
+      iss.samples.forEach((s) => console.log(`     * Tag: ${s.tag}, Size: ${s.dimensions}, Text: "${s.text}"`));
     }
   }
 
   // 3. Test Adaptive Recovery
-  console.log('\n--- 3. Kiểm thử Tự hồi phục WebGL khi GPU Context Loss ---');
+  console.log('\n--- 3. Testing WebGL Context Loss Recovery ---');
   const recRes = await testAdaptiveRecovery({
     url: testUrl,
     preset: 'desktop_1080p',
     testContextLoss: true,
   });
-  console.log(`Kết quả: ${recRes.verdict}`);
-  console.log(`  - Hỗ trợ mô phỏng mất context: ${recRes.contextLossResult?.supported}`);
-  console.log(`  - Bắt được sự kiện mất context (lost): ${recRes.contextLossResult?.lostTriggered}`);
-  console.log(`  - Phục hồi thành công (restored): ${recRes.contextLossResult?.isRestored}`);
+  console.log(`Result: ${recRes.verdict}`);
+  console.log(`  - Context loss simulation supported: ${recRes.contextLossResult?.supported}`);
+  console.log(`  - Caught context lost event: ${recRes.contextLossResult?.lostTriggered}`);
+  console.log(`  - Restored successfully: ${recRes.contextLossResult?.isRestored}`);
 
   // 4. Test True Sync Frametime
-  console.log('\n--- 4. Kiểm thử Đo đạc Frametime True Sync (60 frames) ---');
+  console.log('\n--- 4. Testing True Sync Frametime Profiling (60 frames) ---');
   const frameRes = await profileFrametimeSync({
     url: testUrl,
     sampleFrames: 60,
     warmupMs: 500,
   });
-  console.log(`Đánh giá: ${frameRes.verdict}`);
+  console.log(`Verdict: ${frameRes.verdict}`);
   console.log(`  - Median Frametime: ${frameRes.metrics?.medianFrametimeMs} ms`);
   console.log(`  - P95 Frametime: ${frameRes.metrics?.p95FrametimeMs} ms`);
   console.log(`  - Effective FPS: ${frameRes.metrics?.effectiveFps} FPS`);
   console.log(`  - Jitter: ${frameRes.metrics?.jitterMs} ms`);
 
-  console.log('\n=== TẤT CẢ KIỂM THỬ ĐÃ HOÀN TẤT THÀNH CÔNG! ===');
+  console.log('\n=== ALL INTEGRATION TESTS PASSED SUCCESSFULLY! ===');
 }
 
 runTests().catch((err) => {
-  console.error('Lỗi kiểm thử:', err);
+  console.error('Test run failed:', err);
   process.exit(1);
 });

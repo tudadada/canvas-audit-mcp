@@ -96,24 +96,24 @@ export async function auditCanvasDpr({
         if (sharpnessIndex < 0.85) {
           status = 'BLURRY';
           issues.push(
-            `Canvas bị mờ trên màn hình DPR=${dpr}. Buffer hiện tại (${bufferW}x${bufferH}) nhỏ hơn chuẩn khuyến nghị (${expectedBufferW}x${expectedBufferH}). Cần gán canvas.width = clientWidth * window.devicePixelRatio.`
+            `Canvas appears blurry on DPR=${dpr}. Current buffer (${bufferW}x${bufferH}) is smaller than recommended physical size (${expectedBufferW}x${expectedBufferH}). Set canvas.width = clientWidth * window.devicePixelRatio.`
           );
         } else if (sharpnessIndex > 1.2) {
           status = 'OVERSIZED';
           issues.push(
-            `Canvas render lãng phí tài nguyên. Buffer (${bufferW}x${bufferH}) lớn hơn cần thiết (${expectedBufferW}x${expectedBufferH}), gây tốn VRAM và nghẽn GPU.`
+            `Canvas buffer is oversized (${bufferW}x${bufferH}) compared to recommended target (${expectedBufferW}x${expectedBufferH}), causing wasted VRAM and GPU fillrate bottlenecks.`
           );
         }
 
         if (aspectDistortion > 0.05 && clientW > 0 && clientH > 0) {
           issues.push(
-            `Lỗi méo hình (Aspect Distortion ${(aspectDistortion * 100).toFixed(1)}%): Tỷ lệ khung CSS (${cssAspect.toFixed(2)}) khác tỷ lệ buffer (${bufferAspect.toFixed(2)}).`
+            `Aspect distortion detected (${(aspectDistortion * 100).toFixed(1)}%): CSS frame aspect (${cssAspect.toFixed(2)}) deviates from drawing buffer aspect (${bufferAspect.toFixed(2)}).`
           );
         }
 
         if ((contextType === 'webgl' || contextType === 'webgl2') && (!hasContextLostHandler || !hasContextRestoredHandler)) {
           issues.push(
-            'Thiếu bộ lắng nghe tự hồi phục (webglcontextlost / webglcontextrestored). Trang web sẽ bị chết đứng vĩnh viễn nếu GPU bị crash hoặc reload.'
+            'Missing self-recovery listeners (webglcontextlost / webglcontextrestored). The application will freeze permanently if the GPU crashes or reloads.'
           );
         }
 
