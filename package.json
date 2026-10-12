@@ -20,7 +20,19 @@
     "frametime",
     "ergonomics"
   ],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tudadada/canvas-audit-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tudadada/canvas-audit-mcp/issues"
+  },
+  "homepage": "https://github.com/tudadada/canvas-audit-mcp#readme",
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "author": "tudadada",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",
