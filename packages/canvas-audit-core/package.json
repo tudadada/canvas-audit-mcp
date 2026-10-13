@@ -1,0 +1,35 @@
+{
+  "name": "canvas-audit-core",
+  "version": "1.0.0",
+  "description": "Driver-agnostic measurement engine for canvas, WebGL and display-quality audits. Bring your own browser.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./page-fns": "./src/page-fns.js",
+    "./analysis": "./src/analysis.js",
+    "./baseline": "./src/baseline.js"
+  },
+  "scripts": {
+    "test": "node --test tests/"
+  },
+  "keywords": [
+    "canvas",
+    "webgl",
+    "devicepixelratio",
+    "dpr",
+    "frametime",
+    "display-audit",
+    "accessibility"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tudadada/canvas-audit-mcp.git",
+    "directory": "packages/canvas-audit-core"
+  },
+  "files": ["src", "README.md"],
+  "engines": { "node": ">=18.0.0" },
+  "author": "tudadada",
+  "license": "MIT",
+  "dependencies": {}
+}

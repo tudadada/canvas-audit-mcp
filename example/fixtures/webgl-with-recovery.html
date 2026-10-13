@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>WebGL with correct recovery handling</title>
+  </head>
+  <body style="margin: 0">
+    <h1>WebGL app that handles context loss correctly</h1>
+    <canvas id="gl" width="400" height="300" style="width: 400px; height: 300px"></canvas>
+    <script>
+      const canvas = document.getElementById('gl');
+      let gl = canvas.getContext('webgl');
+      let running = true;
+      let tick = 0;
+
+      canvas.addEventListener('webglcontextlost', function (event) {
+        // The one line that makes recovery possible at all.
+        event.preventDefault();
+        running = false;
+      });
+
+      canvas.addEventListener('webglcontextrestored', function () {
+        gl = canvas.getContext('webgl');
+        running = true;
+        requestAnimationFrame(frame);
+      });
+
+      function frame() {
+        tick++;
+        if (running && gl && !gl.isContextLost()) {
+          gl.clearColor(0.3, (tick % 100) / 100, 0.4, 1);
+          gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "name": "canvas-audit-playwright",
+  "version": "1.0.0",
+  "description": "Canvas, WebGL and display-quality assertions for Playwright: sharpness at device pixel ratio, real frame pacing, touch targets, GPU context-loss recovery, and baseline regression tracking.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "keywords": [
+    "playwright",
+    "playwright-test",
+    "canvas",
+    "webgl",
+    "devicepixelratio",
+    "visual-testing",
+    "accessibility",
+    "ci"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tudadada/canvas-audit-mcp.git",
+    "directory": "packages/canvas-audit-playwright"
+  },
+  "files": ["src", "README.md"],
+  "engines": { "node": ">=18.0.0" },
+  "author": "tudadada",
+  "license": "MIT",
+  "dependencies": {
+    "canvas-audit-core": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.40.0"
+  }
+}

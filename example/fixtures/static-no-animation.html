@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Static page</title>
+  </head>
+  <body style="margin: 0">
+    <h1>Nothing animates on this page</h1>
+    <canvas id="s" width="400" height="300" style="width: 400px; height: 300px"></canvas>
+    <script>
+      // One draw, then silence. No requestAnimationFrame anywhere.
+      document.getElementById('s').getContext('2d').fillRect(10, 10, 60, 60);
+    </script>
+  </body>
+</html>

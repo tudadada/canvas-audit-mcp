@@ -1,7 +1,7 @@
 @echo off
-title Push Canvas Audit MCP to GitHub
+title Push Canvas Audit Monorepo to GitHub
 echo Pushing source code to GitHub...
-git push -u origin main
+git push origin main
 echo.
 if %ERRORLEVEL% EQU 0 (
     echo === SUCCESS! Source code successfully pushed to GitHub! ===

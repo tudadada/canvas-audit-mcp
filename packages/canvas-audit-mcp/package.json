@@ -1,0 +1,31 @@
+{
+  "name": "canvas-audit-mcp",
+  "version": "1.2.0",
+  "mcpName": "surf.insight/canvas-audit-mcp",
+  "description": "Opinionated Canvas, WebGL & Display Quality Auditor MCP Server",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": { "canvas-audit-mcp": "./src/index.js" },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node tests/test-local.js"
+  },
+  "keywords": ["mcp", "model-context-protocol", "canvas", "webgl", "display-audit", "dpr", "frametime", "ergonomics"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tudadada/canvas-audit-mcp.git",
+    "directory": "packages/canvas-audit-mcp"
+  },
+  "bugs": { "url": "https://github.com/tudadada/canvas-audit-mcp/issues" },
+  "homepage": "https://github.com/tudadada/canvas-audit-mcp#readme",
+  "files": ["src", "tests", "server.json", "README.md"],
+  "engines": { "node": ">=18.0.0" },
+  "author": "tudadada",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "canvas-audit-core": "^1.0.0",
+    "playwright": "^1.50.1",
+    "zod": "^3.24.2"
+  }
+}

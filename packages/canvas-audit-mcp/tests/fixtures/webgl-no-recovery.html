@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>WebGL without recovery handling</title>
+  </head>
+  <body style="margin: 0">
+    <h1>WebGL app that ignores context loss entirely</h1>
+    <canvas id="gl" width="400" height="300" style="width: 400px; height: 300px"></canvas>
+    <script>
+      const gl = document.getElementById('gl').getContext('webgl');
+      let tick = 0;
+      function frame() {
+        tick++;
+        if (!gl.isContextLost()) {
+          gl.clearColor(0.1, 0.2, (tick % 100) / 100, 1);
+          gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

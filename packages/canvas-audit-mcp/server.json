@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "surf.insight/canvas-audit-mcp",
+  "description": "Opinionated Canvas, WebGL and display-quality auditor: DPR sharpness, real frame pacing, touch ergonomics and GPU context-loss recovery.",
+  "version": "1.1.0",
+  "repository": {
+    "url": "https://github.com/tudadada/canvas-audit-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://insight.surf",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "canvas-audit-mcp",
+      "version": "1.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "CANVAS_AUDIT_ALLOW_NO_SANDBOX",
+          "description": "Set to 0 to refuse running Chromium without its sandbox instead of falling back to it.",
+          "isRequired": false,
+          "default": "1"
+        }
+      ]
+    }
+  ]
+}
